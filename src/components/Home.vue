@@ -1,30 +1,39 @@
 <template>
     <v-container>
-        <v-autocomplete
-            :items="countries"
-            item-text="name"
-            item-value='iso'
-            label="Choose a country to view its data"
-            v-model="selected_iso"
-        ></v-autocomplete>
-        <v-btn
-            depressed
-            color="primary"
-            v-if="selected_iso"
-        >
-            Primary
-        </v-btn>
+        <div class="body">
+            <img
+                src="../assets/datahow-logo.png"
+                class="logo"
+            />
+            <v-autocomplete
+                :items="countries"
+                item-text="name"
+                item-value='iso'
+                label="Choose a country to view its data"
+                v-model="selected_iso"
+            ></v-autocomplete>
 
-        <div class="small">
-            <line-chart
-                v-if="show_graph_1"
-                :chart-data="data_1"
-            ></line-chart>
+            <div v-if="selected_iso" class="div_graphs">
+                <v-progress-circular
+                    v-if="graph1_loading"
+                    indeterminate
+                    color="red"
+                    class="loading_animation"
+                >
+                </v-progress-circular>
+                <div v-else>
+                    <line-chart
+                        v-if="show_graphs_1"
+                        :chart-data="data_graphs_1"
+                    ></line-chart>
 
-            <BarChart
-                v-if="show_graph_1"
-                :chart-data="data_1"
-            ></BarChart>
+                    <BarChart
+                        v-if="show_graphs_1"
+                        :chart-data="data_graphs_1"
+                        style="padding-top: 20%"
+                    ></BarChart>
+                </div>
+            </div>
         </div>
     </v-container>
 </template>
@@ -44,8 +53,9 @@
                 countries_loading: true,
                 countries: [],
                 selected_iso: "",
-                data_1: {},
-                show_graph_1: false,
+                data_graphs_1: {},
+                show_graphs_1: false,
+                graph1_loading: true,
             }
         },
 
@@ -83,16 +93,17 @@
 
             async getReports(iso, past_days_range = 3)
             {
-                this.show_graph_1 = false
+                this.show_graphs_1 = false
+                this.graph1_loading = true
                 let color = this.getRandomColor()
-                this.data_1 =
+                this.data_graphs_1 =
                 {
                     labels: [],
                     datasets: [{
-                        label: '# of new cases for selected country',
+                        label: '# of new cases in selected country',
                         data: [],
                         fill: false,
-                        backgroundColor: [color, this.getRandomColor()],
+                        backgroundColor: [color, this.getRandomColor(), this.getRandomColor()],
                         borderColor: color,
                     }]
                 }
@@ -104,13 +115,13 @@
                         let date = moment()
                         date = date.subtract(index, 'days').format("YYYY-MM-DD")
                         
-                        this.data_1.labels.push(moment(date).format("DD/MM/YYYY"))
+                        this.data_graphs_1.labels.push(moment(date).format("DD/MM/YYYY"))
 
                         const result = await axios.get(`
                             /reports/total?date=${date}&iso=${iso}
                         `)
                         
-                        this.data_1.datasets[0].data.push(result.data.data.confirmed_diff)
+                        this.data_graphs_1.datasets[0].data.push(result.data.data.confirmed_diff)
                     }
                     catch (error)
                     {
@@ -118,12 +129,8 @@
                         console.log(error)
                     }
                 }
-                
-
-                console.log(this.data_1)
-                //TODO: handle empty data array -- false positive
-                //TODO: adicionar flag de erro para nao setar true abaixo caso a flag de erro seja true
-                this.show_graph_1 = true
+                this.show_graphs_1 = true
+                this.graph1_loading = false
             },
 
             getRandomColor()
@@ -156,8 +163,29 @@
 
 
 <style>
-    .small {
-        max-width: 600px;
-        margin:  150px auto;
+    .body {
+        display: flex;
+        flex-direction: column;
+        max-width: 50%;
+        margin:  10px auto;
+    }
+
+    .logo {
+        width: 50%;
+        display: flex;
+        align-self: center;
+        padding-bottom: 10%;
+    }
+
+    .div_graphs {
+        width: 100%;
+        display: flex;
+        
+        justify-content: center;
+    }
+
+    .loading_animation {
+        padding-top: 20%;
+        align-self: center;
     }
 </style>

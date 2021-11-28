@@ -1,24 +1,13 @@
-# frontend-challenge
-
+# Frontend challenge - Lucas Paim
 ## Project setup
 ```
 yarn install
 ```
 
+## Create your .env
+At the root of the project, create a file called '.env' and place the instructions just like in the provided example file '.env.example'
+
 ### Compiles and hot-reloads for development
 ```
-yarn serve
+yarn dev
 ```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

@@ -27,6 +27,7 @@
         data()
         {
             return {
+                countries_loading: true,
                 countries: [],
                 selected_iso: "",
             }
@@ -37,11 +38,13 @@
         {
             async getCountries()
             {
+                this.countries_loading = true
                 try
                 {
                     const result = await axios.get("/regions")
-                    console.log("result:", result)
                     this.countries = result.data.data
+                    this.countries_loading = false
+                    //TODO: handle empty data array -- false positive
                 }
                 catch (error)
                 {
